@@ -25,7 +25,7 @@ if (!GMAIL_USER || !GMAIL_PASS) {
 
 // ======= CORS =======
 app.use(cors({
-    origin: "https://form1-bice.vercel.app",
+    origin: "https://studentregistrationformss.netlify.app/",
     methods: ["GET", "POST"],
     credentials: true
 }));
@@ -141,3 +141,4 @@ app.get('/', (req, res) => {
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
