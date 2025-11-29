@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Course Registration Form</title>
+
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 { font-size: 28px; margin-bottom: 10px; }
+        .header p { font-size: 14px; opacity: 0.9; }
+
+        .form-section {
+            padding: 30px;
+        }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; color: #333; font-weight: 600; font-size: 14px; }
+
+        .required { color: #e74c3c; }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .error { border-color: #e74c3c !important; }
+        .error-message { color: #e74c3c; font-size: 12px; margin-top: 5px; }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .btn-primary:hover { transform: translateY(-2px); }
+
+        .success-message, .info-message {
+            padding: 12px; border-radius: 8px; margin-bottom: 20px; display: none;
+        }
+
+        .success-message { background: #d4edda; border: 1px solid #c3e6cb; color: #155724; }
+        .info-message { background: #d1ecf1; border: 1px solid #bee5eb; color: #0c5460; }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Course Registration Portal</h1>
+            <p>Register and receive course PDF via email automatically</p>
+        </div>
+
+        <div class="form-section">
+            <div id="successMessage" class="success-message"></div>
+            <div id="infoMessage" class="info-message"></div>
+
+            <form id="registrationForm" autocomplete="off">
+                <div class="form-group">
+                    <label for="name">Full Name <span class="required">*</span></label>
+                    <input type="text" id="name" placeholder="Enter your full name" autocomplete="off">
+                    <div id="nameError" class="error-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="mobile">Mobile Number <span class="required">*</span></label>
+                    <input type="tel" id="mobile" placeholder="Enter 10-digit mobile number" autocomplete="off">
+                    <div id="mobileError" class="error-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email ID <span class="required">*</span></label>
+                    <input type="email" id="email" placeholder="your.email@example.com" autocomplete="off">
+                    <div id="emailError" class="error-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="degree">Select Degree <span class="required">*</span></label>
+                    <select id="degree">
+                        <option value="">-- Choose Degree --</option>
+                        <option value="BE/B.Tech">BE/B.Tech</option>
+                        <option value="Arts">Arts</option>
+                    </select>
+                    <div id="degreeError" class="error-message"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="specialization">Select Specialization <span class="required">*</span></label>
+                    <select id="specialization" disabled>
+                        <option value="">-- First Select Degree --</option>
+                    </select>
+                    <div id="specializationError" class="error-message"></div>
+                </div>
+
+                <button type="submit" class="btn btn-primary" id="submitBtn">
+                    📧 Submit & Send PDF via Email
+                </button>
+            </form>
+        </div>
+    </div>
+
+<script>
+const API_URL = "https://backend-pe90.onrender.com";
+const specializationOptions = {
+    "BE/B.Tech": [
+        "Computer Science Engineering",
+        "Mechanical Engineering",
+        "Electrical Engineering",
+        "Civil Engineering",
+        "Electronics and Communication",
+        "Information Technology",
+        "Chemical Engineering"
+    ],
+    "Arts": [
+        "English Literature",
+        "History",
+        "Political Science",
+        "Psychology",
+        "Sociology",
+        "Economics",
+        "Fine Arts"
+    ]
+};
+
+document.getElementById("degree").addEventListener("change", function () {
+    const degree = this.value;
+    const specializationSelect = document.getElementById("specialization");
+
+    if (degree && specializationOptions[degree]) {
+        specializationSelect.disabled = false;
+        specializationSelect.innerHTML = '<option value="">-- Choose Specialization --</option>';
+
+        specializationOptions[degree].forEach(spec => {
+            let opt = document.createElement("option");
+            opt.value = opt.textContent = spec;
+            specializationSelect.appendChild(opt);
+        });
+    } else {
+        specializationSelect.disabled = true;
+        specializationSelect.innerHTML = '<option value="">-- First Select Degree --</option>';
+    }
+});
+
+function showMessage(id, msg) {
+    const box = document.getElementById(id);
+    box.innerHTML = msg;
+    box.style.display = "block";
+    setTimeout(() => box.style.display = "none", 5000);
+}
+
+function validateForm() {
+    let valid = true;
+
+    document.querySelectorAll(".error-message").forEach(e => e.textContent = "");
+    document.querySelectorAll("input, select").forEach(e => e.classList.remove("error"));
+
+    const name = document.getElementById("name").value.trim();
+    if (!name) {
+        document.getElementById("nameError").textContent = "Name required";
+        document.getElementById("name").classList.add("error");
+        valid = false;
+    }
+
+    const mobile = document.getElementById("mobile").value.trim();
+    if (!/^\d{10}$/.test(mobile)) {
+        document.getElementById("mobileError").textContent = "Invalid 10-digit number";
+        document.getElementById("mobile").classList.add("error");
+        valid = false;
+    }
+
+    const email = document.getElementById("email").value.trim();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        document.getElementById("emailError").textContent = "Invalid email";
+        document.getElementById("email").classList.add("error");
+        valid = false;
+    }
+
+    if (!document.getElementById("degree").value) {
+        document.getElementById("degreeError").textContent = "Degree required";
+        document.getElementById("degree").classList.add("error");
+        valid = false;
+    }
+    if (!document.getElementById("specialization").value) {
+        document.getElementById("specializationError").textContent = "Specialization required";
+        document.getElementById("specialization").classList.add("error");
+        valid = false;
+    }
+
+    return valid;
+}
+
+async function submitForm(event) {
+    event.preventDefault();
+
+    if (!validateForm()) return;
+
+    const btn = document.getElementById("submitBtn");
+    btn.innerHTML = "Sending...";
+    btn.disabled = true;
+
+    const data = {
+        name: document.getElementById("name").value.trim(),
+        mobile: document.getElementById("mobile").value.trim(),
+        email: document.getElementById("email").value.trim(),
+        degree: document.getElementById("degree").value,
+        specialization: document.getElementById("specialization").value,
+        timestamp: new Date().toLocaleString()
+    };
+
+    try {
+        const res = await fetch(`${API_URL}`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        });
+
+        const result = await res.json().catch(() => ({})); // avoid JSON error
+
+        if (res.ok) {
+            showMessage(
+                "successMessage", 
+                `Registration successful! Email sent to <b>${data.email}</b>`
+            );
+        } else {
+            showMessage(
+                "infoMessage", 
+                result.message || "Email failed to send from server."
+            );
+        }
+
+    } catch (error) {
+        showMessage(
+            "infoMessage", 
+            "Server offline or unreachable. Could not send email."
+        );
+    }
+
+    btn.disabled = false;
+    btn.innerHTML = "📧 Submit & Send PDF via Email";
+
+    document.getElementById("registrationForm").reset();
+    document.getElementById("specialization").disabled = true;
+}
+
+// Listen for form submit event.
+document.getElementById("registrationForm").addEventListener("submit", submitForm);
+</script>
+
+</body>
+</html>
+
